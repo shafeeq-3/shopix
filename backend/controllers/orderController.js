@@ -382,9 +382,10 @@ exports.getUserOrders = async (req, res) => {
 // Get single order by ID
 exports.getOrderById = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id)
+     const order = await Order.findById(req.params.id)
       .populate('orderItems.product', 'name images description')
       .populate('user', 'name email');
+      
 
     if (!order) {
       return res.status(404).json({

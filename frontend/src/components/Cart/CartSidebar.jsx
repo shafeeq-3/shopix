@@ -204,7 +204,7 @@ const CartSidebar = () => {
       {/* Backdrop Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[11] transition-all duration-300"
+          className="fixed  inset-0 bg-black/60 backdrop-blur-sm z-[1111] transition-all duration-300"
           onClick={toggleSidebar}
           aria-hidden="true"
         />
@@ -212,7 +212,7 @@ const CartSidebar = () => {
 
       {/* Professional Sidebar - Fixed positioning to cover full height */}
       <div
-        className={`fixed top-0 right-0 w-full max-w-lg h-screen bg-white shadow-2xl z-[50] transition-transform duration-300 ease-out ${
+        className={`fixed top-0 right-0 w-full max-w-lg h-screen bg-white shadow-2xl z-[1112] transition-transform duration-300 ease-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         role="dialog"
