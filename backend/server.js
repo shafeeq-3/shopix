@@ -113,8 +113,9 @@ connectDB().catch(err => {
 });
 
 // API Routes
-app.use('/api/', apiLimiter); // Rate limiting for all API routes
-app.use('/api/auth', authRoutes); // Auth routes with OTP & 2FA
+// OAuth routes should NOT have rate limiting (Google redirects can trigger it)
+app.use('/api/auth', authRoutes); // Auth routes with OTP & 2FA (no rate limit on OAuth)
+app.use('/api/', apiLimiter); // Rate limiting for other API routes
 app.use('/api/users', require('./routes/userRoutes')); // User routes (register, login, profile)
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
