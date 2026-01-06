@@ -59,8 +59,6 @@ export const AuthProvider = ({ children }) => {
 
   // Login existing user
   const login = async (email, password) => {
-    console.log(email);
-    
     try {
   const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/users/login`, {
         email,
@@ -97,8 +95,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const addToCart = async (productId, quantity = 1) => {
-    // console.log(productId);
-    
     try {
       await axios.post(
   `${process.env.REACT_APP_API_URL}/api/cart`,

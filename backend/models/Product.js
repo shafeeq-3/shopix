@@ -15,8 +15,8 @@ const productSchema = mongoose.Schema(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
-    price: { type: Number, required: true },
-    discountedPrice: { type: Number, default: 0 }, // Optional discounted price
+    price: { type: Number, required: true }, // Always stored in USD (base currency)
+    discountedPrice: { type: Number, default: 0 }, // Optional discounted price in USD
     category: { type: String, required: true }, // Category field
     brand: { type: String, required: true }, // Brand field
     stock: { type: Number, required: true, default: 0 }, // Stock availability

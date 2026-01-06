@@ -14,14 +14,24 @@ import {
   Settings,
   Package,
   Home,
-  LayoutDashboard
+  LayoutDashboard,
+  Users,
+  ShoppingBag,
+  Bell,
+  Search,
+  TrendingUp,
+  Boxes,
+  ListOrdered
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useCurrency } from "../context/CurrencyContext";
 import CartSidebar from "./Cart/CartSidebar";
+import CurrencySelector from "./CurrencySelector";
 
 const Navbar = () => {
   const { user, logoutUser, wishlist, removeFromWishlist } = useAuth();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -83,145 +93,195 @@ const Navbar = () => {
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? 'bg-white/98 backdrop-blur-lg shadow-xl border-b border-gray-200' 
-          : 'bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900'
+          ? 'bg-white/98 backdrop-blur-lg shadow-2xl border-b-2 border-orange-200' 
+          : 'bg-gradient-to-r from-orange-600 via-red-600 to-pink-600'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo */}
-            <Link to="/" className="flex-shrink-0">
-              <div className={`flex items-center gap-2 sm:gap-3 text-xl sm:text-2xl font-bold tracking-wide transition-all duration-300 hover:scale-105 group ${
-                scrolled ? 'text-gray-800' : 'text-white'
-              }`}>
-                <div className="p-1.5 sm:p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                  <Store className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Qandeel❤Store
-                </span>
-              </div>
+            <Link to="/" className="flex-shrink-0 group">
+              <img 
+                src={scrolled ? "/logo-shopix.svg" : "/logo-shopix-dark.svg"} 
+                alt="SHOPIX" 
+                className="h-8 sm:h-10 lg:h-12 w-auto transition-all duration-300 group-hover:scale-110"
+              />
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-6">
+            <div className="hidden lg:flex items-center gap-3">
+              {/* Currency Selector */}
+              <CurrencySelector />
+              
               {!user ? (
-                <div className="flex items-center gap-3">
-                  <Link to="/login">
-                    <button className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 ${
+                /* Guest User Buttons */
+                <div className="flex items-center gap-2">
+                  {/* Products Link for Guests */}
+                  <Link to="/products">
+                    <button className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 ${
                       scrolled 
-                        ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
-                        : 'text-white hover:text-blue-200 hover:bg-white/10'
+                        ? 'text-gray-700 hover:text-orange-600 hover:bg-orange-50' 
+                        : 'text-white hover:text-orange-200 hover:bg-white/10'
+                    }`}>
+                      <Boxes className="w-4 h-4" />
+                      <span>Shop</span>
+                    </button>
+                  </Link>
+                  
+                  <Link to="/login">
+                    <button className={`px-5 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 ${
+                      scrolled 
+                        ? 'text-gray-700 hover:text-orange-600 hover:bg-orange-50' 
+                        : 'text-white hover:text-orange-200 hover:bg-white/10'
                     }`}>
                       Login
                     </button>
                   </Link>
                   <Link to="/register">
-                    <button className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-purple-700">
+                    <button className="px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:from-orange-600 hover:to-red-600">
                       Register
                     </button>
                   </Link>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  {/* Navigation Links */}
+                /* Logged In User Navigation */
+                <div className="flex items-center gap-1">
+                  {/* Home Link */}
                   <Link to="/">
                     <button className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 ${
                       isActivePath('/') 
                         ? scrolled 
-                          ? 'bg-blue-100 text-blue-700' 
-                          : 'bg-white/20 text-white'
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md' 
+                          : 'bg-white/20 text-white shadow-md'
                         : scrolled 
-                        ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
-                        : 'text-white hover:text-blue-200 hover:bg-white/10'
+                        ? 'text-gray-700 hover:text-orange-600 hover:bg-orange-50' 
+                        : 'text-white hover:text-orange-200 hover:bg-white/10'
                     }`}>
                       <Home className="w-4 h-4" />
-                      <span>Home</span>
+                      <span className="hidden xl:inline">Home</span>
                     </button>
                   </Link>
 
+                  {/* Products/Shop Link */}
+                  <Link to="/products">
+                    <button className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 ${
+                      isActivePath('/products') 
+                        ? scrolled 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md' 
+                          : 'bg-white/20 text-white shadow-md'
+                        : scrolled 
+                        ? 'text-gray-700 hover:text-orange-600 hover:bg-orange-50' 
+                        : 'text-white hover:text-orange-200 hover:bg-white/10'
+                    }`}>
+                      <Boxes className="w-4 h-4" />
+                      <span className="hidden xl:inline">Shop</span>
+                    </button>
+                  </Link>
+
+                  {/* My Orders Link */}
                   <Link to="/trackmyorder">
                     <button className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 ${
                       isActivePath('/trackmyorder') 
                         ? scrolled 
-                          ? 'bg-blue-100 text-blue-700' 
-                          : 'bg-white/20 text-white'
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md' 
+                          : 'bg-white/20 text-white shadow-md'
                         : scrolled 
-                        ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
-                        : 'text-white hover:text-blue-200 hover:bg-white/10'
+                        ? 'text-gray-700 hover:text-orange-600 hover:bg-orange-50' 
+                        : 'text-white hover:text-orange-200 hover:bg-white/10'
                     }`}>
-                      <Package className="w-4 h-4" />
-                      <span>My Orders</span>
+                      <ListOrdered className="w-4 h-4" />
+                      <span className="hidden xl:inline">Orders</span>
                     </button>
                   </Link>
 
-                  {/* Wishlist Button */}
+                  {/* Wishlist Dropdown */}
                   <div className="relative" ref={wishlistRef}>
                     <button
                       onClick={() => setWishlistOpen(!wishlistOpen)}
                       className={`relative flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 ${
                         scrolled 
-                          ? 'text-gray-700 hover:bg-gray-100' 
+                          ? 'text-gray-700 hover:bg-orange-50' 
                           : 'text-white hover:bg-white/10'
                       }`}
                     >
                       <div className="relative">
-                        <Heart className="w-5 h-5 text-red-500" />
+                        <Heart className={`w-5 h-5 ${wishlist?.length > 0 ? 'fill-red-500 text-red-500' : 'text-red-500'}`} />
                         {wishlist?.length > 0 && (
-                          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold">
+                          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">
                             {wishlist.length}
                           </span>
                         )}
                       </div>
-                      <span>Wishlist</span>
+                      <span className="hidden xl:inline">Wishlist</span>
                     </button>
 
-                    {/* Wishlist Dropdown */}
+                    {/* Wishlist Dropdown Menu */}
                     {wishlistOpen && (
-                      <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 animate-in slide-in-from-top-2 duration-200">
-                        <div className="p-4 border-b border-gray-100">
-                          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                            <Heart className="text-red-500 w-5 h-5" />
+                      <div className="absolute right-0 mt-3 w-96 bg-white rounded-2xl shadow-2xl border-2 border-orange-200 z-50 animate-in slide-in-from-top-4 duration-300">
+                        <div className="bg-gradient-to-r from-orange-500 to-red-500 p-4 rounded-t-2xl">
+                          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                            <Heart className="w-5 h-5 fill-white" />
                             Your Wishlist
+                            {wishlist?.length > 0 && (
+                              <span className="ml-auto bg-white/20 px-3 py-1 rounded-full text-sm">
+                                {wishlist.length} {wishlist.length === 1 ? 'item' : 'items'}
+                              </span>
+                            )}
                           </h3>
                         </div>
                         
                         <div className="max-h-96 overflow-y-auto">
                           {wishlist?.length > 0 ? (
-                            <div className="p-2">
+                            <div className="p-3 space-y-2">
                               {wishlist.map((item) => (
-                                <div key={item._id} className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors duration-200 group">
+                                <div key={item._id} className="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl transition-all duration-200 group border border-transparent hover:border-orange-200">
                                   <Link
                                     to={`/product/${item._id}`} 
                                     onClick={handleWishlistItemClick}
                                     className="flex items-center gap-3 flex-1 min-w-0"
                                   >
-                                    <img 
-                                      src={item.image} 
-                                      alt={item.name} 
-                                      className="w-12 h-12 rounded-lg object-cover shadow-md" 
-                                    />
+                                    <div className="relative">
+                                      <img 
+                                        src={item.image} 
+                                        alt={item.name} 
+                                        className="w-16 h-16 rounded-xl object-cover shadow-md group-hover:shadow-lg transition-shadow" 
+                                      />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                    </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
-                                      <p className="text-sm text-gray-500">${item.price}</p>
+                                      <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors">{item.name}</p>
+                                      <p className="text-base font-bold text-orange-600">{formatPrice(item.price)}</p>
                                     </div>
                                   </Link>
                                   <button 
                                     onClick={() => removeFromWishlist(item._id)} 
-                                    className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                                    className="p-2 text-red-400 hover:text-white hover:bg-red-500 rounded-lg transition-all duration-200 hover:scale-110"
+                                    title="Remove from wishlist"
                                   >
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash2 className="w-5 h-5" />
                                   </button>
                                 </div>
                               ))}
                             </div>
                           ) : (
-                            <div className="p-8 text-center">
-                              <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                              <p className="text-gray-500 font-medium">Your wishlist is empty</p>
-                              <p className="text-sm text-gray-400 mt-1">Add items you love!</p>
+                            <div className="p-12 text-center">
+                              <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-100 to-red-100 rounded-full flex items-center justify-center">
+                                <Heart className="w-10 h-10 text-orange-400" />
+                              </div>
+                              <p className="text-gray-900 font-semibold text-lg mb-2">Your wishlist is empty</p>
+                              <p className="text-sm text-gray-500">Start adding items you love!</p>
                             </div>
                           )}
                         </div>
+                        
+                        {wishlist?.length > 0 && (
+                          <div className="p-3 border-t-2 border-orange-100">
+                            <Link to="/wishlist" onClick={() => setWishlistOpen(false)}>
+                              <button className="w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105">
+                                View All Wishlist
+                              </button>
+                            </Link>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -229,82 +289,142 @@ const Navbar = () => {
                   {/* Cart Component */}
                   <CartSidebar />
 
-                  {/* User Menu */}
+                  {/* User Menu Dropdown */}
                   <div className="relative" ref={userMenuRef}>
                     <button
                       onClick={() => setUserMenuOpen(!userMenuOpen)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 ${
                         scrolled 
-                          ? 'text-gray-700 hover:bg-gray-100' 
-                          : 'text-white hover:bg-white/10'
+                          ? 'text-gray-700 hover:bg-orange-50 border-2 border-transparent hover:border-orange-200' 
+                          : 'text-white hover:bg-white/10 border-2 border-white/20'
                       }`}
                     >
                       <div className="relative">
-                        <UserCircle className="w-6 h-6" />
+                        {user?.avatar ? (
+                          <img 
+                            src={`${process.env.REACT_APP_API_URL}${user.avatar}`}
+                            alt={user.name}
+                            className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-lg"
+                            crossOrigin="anonymous"
+                          />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold shadow-lg">
+                            {user?.name?.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         {user?.role === "admin" && (
-                          <Crown className="absolute -top-1 -right-1 text-yellow-400 w-4 h-4" />
+                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+                            <Crown className="w-3 h-3 text-yellow-900" />
+                          </div>
                         )}
                       </div>
-                      <span className="max-w-[100px] truncate">{user?.name}</span>
+                      <span className="max-w-[100px] truncate font-semibold hidden xl:inline">{user?.name}</span>
                       <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${userMenuOpen ? 'rotate-180' : ''}`} />
                     </button>
 
-                    {/* User Dropdown */}
+                    {/* User Dropdown Menu */}
                     {userMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50">
-                        <div className="px-4 py-3 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
-                          <p className="text-sm text-gray-500 truncate">{user?.email}</p>
-                          {user?.role === "admin" && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 mt-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">
-                              <Crown className="w-3 h-3" />
-                              Admin
-                            </span>
-                          )}
+                      <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl border-2 border-orange-200 py-2 z-50 animate-in slide-in-from-top-4 duration-300">
+                        {/* User Info Header */}
+                        <div className="px-4 py-4 border-b-2 border-orange-100 bg-gradient-to-r from-orange-50 to-red-50">
+                          <div className="flex items-center gap-3">
+                            {user?.avatar ? (
+                              <img 
+                                src={`${process.env.REACT_APP_API_URL}${user.avatar}`}
+                                alt={user.name}
+                                className="w-12 h-12 rounded-full object-cover border-2 border-orange-300 shadow-md"
+                                crossOrigin="anonymous"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                                {user?.name?.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
+                              <p className="text-xs text-gray-600 truncate">{user?.email}</p>
+                              {user?.role === "admin" && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 mt-1 text-xs font-bold text-yellow-800 bg-yellow-200 rounded-full border border-yellow-300">
+                                  <Crown className="w-3 h-3" />
+                                  Admin
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
                         
-                        <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
-                          <User className="w-4 h-4" />
-                          My Profile
-                        </Link>
-                        
-                        <Link to="/trackmyorder" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
-                          <Package className="w-4 h-4" />
-                          My Orders
-                        </Link>
+                        {/* Regular User Menu Items */}
+                        <div className="py-2">
+                          <Link to="/profile" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all group">
+                            <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-orange-100 transition-colors">
+                              <User className="w-4 h-4 text-blue-600 group-hover:text-orange-600" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm">My Profile</p>
+                              <p className="text-xs text-gray-500">View and edit profile</p>
+                            </div>
+                          </Link>
+                          
+                          <Link to="/trackmyorder" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all group">
+                            <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-orange-100 transition-colors">
+                              <ListOrdered className="w-4 h-4 text-purple-600 group-hover:text-orange-600" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm">My Orders</p>
+                              <p className="text-xs text-gray-500">Track your orders</p>
+                            </div>
+                          </Link>
 
-                        <Link to="/update-profile" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
-                          <Settings className="w-4 h-4" />
-                          Settings
-                        </Link>
+                          <Link to="/update-profile" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all group">
+                            <div className="p-2 bg-green-100 rounded-lg group-hover:bg-orange-100 transition-colors">
+                              <Settings className="w-4 h-4 text-green-600 group-hover:text-orange-600" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm">Settings</p>
+                              <p className="text-xs text-gray-500">Account settings</p>
+                            </div>
+                          </Link>
+                        </div>
                         
+                        {/* Admin Section */}
                         {user?.role === "admin" && (
                           <>
-                            <hr className="my-2" />
-                            <Link to="/admin/dashboard" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
-                              <Crown className="w-4 h-4 text-yellow-500" />
-                              Admin Dashboard
-                            </Link>
-                            <Link to="/OrderDashboard" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
-                              <LayoutDashboard className="w-4 h-4 text-blue-500" />
-                              Order Dashboard
-                            </Link>
-                            <Link to="/UserActivityDashboard" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
-                              <User className="w-4 h-4 text-green-500" />
-                              User Activity
-                            </Link>
+                            <div className="my-2 border-t-2 border-orange-100"></div>
+                            <div className="px-4 py-2">
+                              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                                <Crown className="w-3 h-3 text-yellow-500" />
+                                Admin Panel
+                              </p>
+                            </div>
+                            <div className="py-2">
+                              <Link to="/admin/dashboard" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition-all group">
+                                <div className="p-2 bg-yellow-100 rounded-lg group-hover:bg-yellow-200 transition-colors">
+                                  <LayoutDashboard className="w-4 h-4 text-yellow-600 group-hover:text-yellow-700" />
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-sm">Admin Dashboard</p>
+                                  <p className="text-xs text-gray-500">Manage everything</p>
+                                </div>
+                              </Link>
+                            </div>
                           </>
                         )}
-                        
-                        <hr className="my-2" />
-                        
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 transition-colors"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Sign Out
-                        </button>
+
+                        {/* Logout */}
+                        <div className="mt-2 border-t-2 border-orange-100 pt-2">
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 transition-all group"
+                          >
+                            <div className="p-2 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
+                              <LogOut className="w-4 h-4 text-red-600" />
+                            </div>
+                            <div className="text-left">
+                              <p className="font-semibold text-sm">Sign Out</p>
+                              <p className="text-xs text-gray-500">Logout from account</p>
+                            </div>
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -313,7 +433,12 @@ const Navbar = () => {
             </div>
 
             {/* Mobile Menu Button & Icons */}
-            <div className="flex items-center gap-2 lg:hidden">
+            <div className="flex items-center gap-1 sm:gap-2 lg:hidden">
+              {/* Currency Selector - Mobile */}
+              <div className="hidden sm:block">
+                <CurrencySelector />
+              </div>
+              
               {user && (
                 <>
                   {/* Mobile Cart Icon */}
@@ -322,13 +447,13 @@ const Navbar = () => {
                   {/* Mobile Wishlist Icon */}
                   <button
                     onClick={() => setWishlistOpen(!wishlistOpen)}
-                    className={`relative p-2 rounded-lg transition-all duration-300 ${
-                      scrolled ? 'text-gray-700' : 'text-white'
+                    className={`relative p-2 rounded-lg transition-all duration-300 hover:scale-110 ${
+                      scrolled ? 'text-gray-700 hover:bg-orange-50' : 'text-white hover:bg-white/10'
                     }`}
                   >
-                    <Heart className="w-6 h-6 text-red-500" />
+                    <Heart className={`w-6 h-6 ${wishlist?.length > 0 ? 'fill-red-500 text-red-500' : 'text-red-500'}`} />
                     {wishlist?.length > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold">
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">
                         {wishlist.length}
                       </span>
                     )}
@@ -339,8 +464,8 @@ const Navbar = () => {
               {/* Mobile Menu Toggle */}
               <button 
                 onClick={() => setMenuOpen(!menuOpen)} 
-                className={`p-2 rounded-lg transition-all duration-300 ${
-                  scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+                className={`p-2 rounded-lg transition-all duration-300 hover:scale-110 ${
+                  scrolled ? 'text-gray-700 hover:bg-orange-50' : 'text-white hover:bg-white/10'
                 }`}
               >
                 {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -351,113 +476,168 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {menuOpen && (
-          <div className="lg:hidden bg-white border-t border-gray-200 shadow-xl">
-            <div className="px-4 py-4 space-y-2 max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="lg:hidden bg-white border-t-2 border-orange-200 shadow-2xl animate-in slide-in-from-top-4 duration-300">
+            <div className="px-3 sm:px-4 py-4 space-y-2 max-h-[calc(100vh-4rem)] overflow-y-auto">
               {!user ? (
-                <>
-                  <Link to="/login">
-                    <button className="w-full px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
-                      Login
+                /* Guest User - Mobile */
+                <div className="space-y-2">
+                  {/* Products Link for Guests */}
+                  <Link to="/products" onClick={() => setMenuOpen(false)}>
+                    <button className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all font-semibold border-2 ${
+                      isActivePath('/products')
+                        ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md border-transparent'
+                        : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-transparent hover:border-orange-200'
+                    }`}>
+                      <Boxes className="w-5 h-5" />
+                      Browse Products
                     </button>
                   </Link>
-                  <Link to="/register">
-                    <button className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium text-center shadow-lg">
-                      Register
+                  
+                  <Link to="/login" onClick={() => setMenuOpen(false)}>
+                    <button className="w-full px-4 py-3 text-left text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-xl font-semibold transition-all flex items-center gap-3 border-2 border-transparent hover:border-orange-200">
+                      <User className="w-5 h-5" />
+                      Login to Your Account
                     </button>
                   </Link>
-                </>
+                  <Link to="/register" onClick={() => setMenuOpen(false)}>
+                    <button className="w-full px-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-bold text-center shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                      Create New Account
+                    </button>
+                  </Link>
+                  
+                  {/* Currency Selector for Mobile Guest */}
+                  <div className="pt-4 border-t-2 border-gray-200 sm:hidden">
+                    <p className="px-4 py-2 text-xs font-bold text-gray-500 uppercase">Currency</p>
+                    <div className="px-2">
+                      <CurrencySelector />
+                    </div>
+                  </div>
+                </div>
               ) : (
+                /* Logged In User - Mobile */
                 <>
-                  {/* User Info */}
-                  <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                  {/* User Info Card */}
+                  <div className="flex items-center gap-3 px-4 py-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border-2 border-orange-200 shadow-sm">
                     <div className="relative">
-                      <UserCircle className="w-10 h-10 text-gray-600" />
+                      {user?.avatar ? (
+                        <img 
+                          src={`${process.env.REACT_APP_API_URL}${user.avatar}`}
+                          alt={user.name}
+                          className="w-14 h-14 rounded-full object-cover border-3 border-white shadow-lg"
+                          crossOrigin="anonymous"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold text-xl shadow-lg border-3 border-white">
+                          {user?.name?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       {user?.role === "admin" && (
-                        <Crown className="absolute -top-1 -right-1 text-yellow-400 w-4 h-4" />
+                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+                          <Crown className="w-4 h-4 text-yellow-900" />
+                        </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 truncate">{user?.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                      <p className="font-bold text-gray-900 truncate text-base">{user?.name}</p>
+                      <p className="text-xs text-gray-600 truncate">{user?.email}</p>
                       {user?.role === "admin" && (
-                        <span className="inline-block text-xs text-yellow-600 font-medium mt-1">Admin Account</span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 mt-1 text-xs font-bold text-yellow-800 bg-yellow-200 rounded-full border border-yellow-300">
+                          <Crown className="w-3 h-3" />
+                          Admin
+                        </span>
                       )}
                     </div>
                   </div>
 
                   {/* Navigation Links */}
-                  <Link to="/">
-                    <button className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors ${
-                      isActivePath('/') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
-                    }`}>
-                      <Home className="w-5 h-5" />
-                      Home
-                    </button>
-                  </Link>
+                  <div className="space-y-1">
+                    <Link to="/" onClick={() => setMenuOpen(false)}>
+                      <button className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all font-semibold ${
+                        isActivePath('/') 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md' 
+                          : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-2 border-transparent hover:border-orange-200'
+                      }`}>
+                        <Home className="w-5 h-5" />
+                        <span>Home</span>
+                      </button>
+                    </Link>
 
-                  <Link to="/profile">
-                    <button className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors ${
-                      isActivePath('/profile') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
-                    }`}>
-                      <User className="w-5 h-5" />
-                      My Profile
-                    </button>
-                  </Link>
+                    <Link to="/products" onClick={() => setMenuOpen(false)}>
+                      <button className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all font-semibold ${
+                        isActivePath('/products') 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md' 
+                          : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-2 border-transparent hover:border-orange-200'
+                      }`}>
+                        <Boxes className="w-5 h-5" />
+                        <span>Shop Products</span>
+                      </button>
+                    </Link>
 
-                  <Link to="/trackmyorder">
-                    <button className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors ${
-                      isActivePath('/trackmyorder') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
-                    }`}>
-                      <Package className="w-5 h-5" />
-                      My Orders
-                    </button>
-                  </Link>
+                    <Link to="/profile" onClick={() => setMenuOpen(false)}>
+                      <button className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all font-semibold ${
+                        isActivePath('/profile') 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md' 
+                          : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-2 border-transparent hover:border-orange-200'
+                      }`}>
+                        <User className="w-5 h-5" />
+                        <span>My Profile</span>
+                      </button>
+                    </Link>
 
-                  <Link to="/update-profile">
-                    <button className="flex items-center gap-3 w-full px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                      <Settings className="w-5 h-5" />
-                      Settings
-                    </button>
-                  </Link>
+                    <Link to="/trackmyorder" onClick={() => setMenuOpen(false)}>
+                      <button className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all font-semibold ${
+                        isActivePath('/trackmyorder') 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md' 
+                          : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600 border-2 border-transparent hover:border-orange-200'
+                      }`}>
+                        <ListOrdered className="w-5 h-5" />
+                        <span>My Orders</span>
+                      </button>
+                    </Link>
 
-                  {/* Admin Links */}
+                    <Link to="/update-profile" onClick={() => setMenuOpen(false)}>
+                      <button className="flex items-center gap-3 w-full px-4 py-3 text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-xl transition-all font-semibold border-2 border-transparent hover:border-orange-200">
+                        <Settings className="w-5 h-5" />
+                        <span>Settings</span>
+                      </button>
+                    </Link>
+                  </div>
+
+                  {/* Admin Section */}
                   {user?.role === "admin" && (
                     <>
-                      <div className="my-2 border-t border-gray-200"></div>
-                      <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Admin Panel</p>
+                      <div className="my-3 border-t-2 border-orange-200"></div>
+                      <div className="px-4 py-2 flex items-center gap-2">
+                        <Crown className="w-4 h-4 text-yellow-500" />
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Admin Panel</p>
+                      </div>
                       
-                      <Link to="/admin/dashboard">
-                        <button className="flex items-center gap-3 w-full px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                          <Crown className="w-5 h-5 text-yellow-500" />
-                          Admin Dashboard
-                        </button>
-                      </Link>
-
-                      <Link to="/OrderDashboard">
-                        <button className="flex items-center gap-3 w-full px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                          <LayoutDashboard className="w-5 h-5 text-blue-500" />
-                          Order Dashboard
-                        </button>
-                      </Link>
-
-                      <Link to="/UserActivityDashboard">
-                        <button className="flex items-center gap-3 w-full px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                          <User className="w-5 h-5 text-green-500" />
-                          User Activity
+                      <Link to="/admin/dashboard" onClick={() => setMenuOpen(false)}>
+                        <button className="flex items-center gap-3 w-full px-4 py-3 text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 rounded-xl transition-all font-semibold border-2 border-yellow-200 hover:border-yellow-300 bg-yellow-50/50">
+                          <LayoutDashboard className="w-5 h-5 text-yellow-600" />
+                          <span>Admin Dashboard</span>
                         </button>
                       </Link>
                     </>
                   )}
 
-                  <div className="my-2 border-t border-gray-200"></div>
+                  {/* Currency Selector for Mobile */}
+                  <div className="pt-3 border-t-2 border-gray-200 sm:hidden">
+                    <p className="px-4 py-2 text-xs font-bold text-gray-500 uppercase">Currency</p>
+                    <div className="px-2">
+                      <CurrencySelector />
+                    </div>
+                  </div>
 
-                  {/* Logout */}
+                  <div className="my-3 border-t-2 border-gray-200"></div>
+
+                  {/* Logout Button */}
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold border-2 border-red-200 hover:border-red-300"
                   >
                     <LogOut className="w-5 h-5" />
-                    Sign Out
+                    <span>Sign Out</span>
                   </button>
                 </>
               )}
@@ -467,43 +647,53 @@ const Navbar = () => {
 
         {/* Mobile Wishlist Dropdown */}
         {wishlistOpen && user && (
-          <div className="lg:hidden bg-white border-t border-gray-200 shadow-xl">
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-3">
-                <Heart className="text-red-500 w-5 h-5" />
-                Your Wishlist
-              </h3>
+          <div className="lg:hidden bg-white border-t-2 border-orange-200 shadow-2xl animate-in slide-in-from-top-4 duration-300">
+            <div className="p-3 sm:p-4">
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 p-4 rounded-xl mb-3">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Heart className="w-5 h-5 fill-white" />
+                  Your Wishlist
+                  {wishlist?.length > 0 && (
+                    <span className="ml-auto bg-white/20 px-3 py-1 rounded-full text-sm">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </h3>
+              </div>
               <div className="space-y-2 max-h-80 overflow-y-auto">
                 {wishlist?.length > 0 ? (
                   wishlist.map((item) => (
-                    <div key={item._id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                    <div key={item._id} className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl border-2 border-orange-200 hover:border-orange-300 transition-all">
                       <Link 
                         to={`/product/${item._id}`} 
                         onClick={handleWishlistItemClick}
-                        className="flex items-center gap-3 flex-1"
+                        className="flex items-center gap-3 flex-1 min-w-0"
                       >
                         <img 
                           src={item.image} 
                           alt={item.name} 
-                          className="w-12 h-12 rounded-lg object-cover"
+                          className="w-16 h-16 rounded-xl object-cover shadow-md"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
-                          <p className="text-sm text-gray-500">${item.price}</p>
+                          <p className="text-sm font-bold text-gray-900 truncate">{item.name}</p>
+                          <p className="text-base font-bold text-orange-600">{formatPrice(item.price)}</p>
                         </div>
                       </Link>
                       <button 
                         onClick={() => removeFromWishlist(item._id)} 
-                        className="p-2 text-red-400 hover:text-red-600 rounded-lg"
+                        className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-all hover:scale-110 shadow-md"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8">
-                    <Heart className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                    <p className="text-gray-500">Your wishlist is empty</p>
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-100 to-red-100 rounded-full flex items-center justify-center">
+                      <Heart className="w-10 h-10 text-orange-400" />
+                    </div>
+                    <p className="text-gray-900 font-bold text-lg mb-2">Your wishlist is empty</p>
+                    <p className="text-sm text-gray-500">Start adding items you love!</p>
                   </div>
                 )}
               </div>
@@ -513,7 +703,7 @@ const Navbar = () => {
       </nav>
       
       {/* Spacer */}
-      <div className="h-16"></div>
+      <div className="h-14 sm:h-16"></div>
     </>
   );
 };

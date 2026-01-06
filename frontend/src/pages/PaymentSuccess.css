@@ -1,0 +1,281 @@
+/* Payment Success Page */
+.payment-success-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.success-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  padding: 48px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Success Icon */
+.success-icon {
+  margin-bottom: 24px;
+  animation: scaleIn 0.6s ease-out 0.2s both;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.success-icon svg {
+  filter: drop-shadow(0 4px 8px rgba(16, 185, 129, 0.2));
+}
+
+/* Heading */
+.success-card h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2C3E50;
+  margin-bottom: 12px;
+  animation: fadeIn 0.6s ease-out 0.3s both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.success-message {
+  font-size: 16px;
+  color: #6c757d;
+  margin-bottom: 32px;
+  line-height: 1.6;
+  animation: fadeIn 0.6s ease-out 0.4s both;
+}
+
+/* Order Details */
+.order-details {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  animation: fadeIn 0.6s ease-out 0.5s both;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.detail-item .label {
+  font-weight: 600;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.detail-item .value {
+  font-weight: 600;
+  color: #2C3E50;
+  font-size: 15px;
+}
+
+.status-confirmed {
+  color: #10b981;
+  text-transform: capitalize;
+  background: #d1fae5;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+/* Success Info */
+.success-info {
+  margin-bottom: 32px;
+  animation: fadeIn 0.6s ease-out 0.6s both;
+}
+
+.info-box {
+  display: flex;
+  gap: 16px;
+  text-align: left;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.info-box:last-child {
+  margin-bottom: 0;
+}
+
+.info-box svg {
+  flex-shrink: 0;
+  color: #FF6B35;
+  margin-top: 2px;
+}
+
+.info-box strong {
+  display: block;
+  color: #2C3E50;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.info-box p {
+  color: #6c757d;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+  animation: fadeIn 0.6s ease-out 0.7s both;
+}
+
+.action-buttons .btn {
+  width: 100%;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.btn-secondary {
+  background: #2C3E50;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #1a252f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
+}
+
+.btn-outline {
+  background: white;
+  color: #2C3E50;
+  border: 2px solid #e5e7eb;
+}
+
+.btn-outline:hover {
+  border-color: #FF6B35;
+  color: #FF6B35;
+  transform: translateY(-2px);
+}
+
+/* SHOPIX Branding */
+.shopix-branding {
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+  animation: fadeIn 0.6s ease-out 0.8s both;
+}
+
+.shopix-branding p {
+  color: #6c757d;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.shopix-branding strong {
+  color: #FF6B35;
+  font-weight: 700;
+}
+
+.shopix-branding .tagline {
+  font-size: 12px;
+  color: #adb5bd;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .success-card {
+    padding: 32px 24px;
+  }
+
+  .success-card h1 {
+    font-size: 24px;
+  }
+
+  .success-message {
+    font-size: 14px;
+  }
+
+  .success-icon svg {
+    width: 60px;
+    height: 60px;
+  }
+
+  .order-details {
+    padding: 16px;
+  }
+
+  .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .info-box {
+    padding: 12px;
+  }
+
+  .action-buttons .btn {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}

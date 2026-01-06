@@ -1,0 +1,215 @@
+/* Stripe Checkout Styles */
+.stripe-checkout-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.payment-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.payment-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2C3E50;
+  margin-bottom: 8px;
+}
+
+.payment-header p {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Stripe Form */
+.stripe-form {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.card-element-container {
+  margin-bottom: 20px;
+}
+
+.card-element-container label {
+  display: block;
+  font-weight: 600;
+  color: #2C3E50;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.card-element-container .StripeElement {
+  padding: 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  transition: border-color 0.3s ease;
+}
+
+.card-element-container .StripeElement--focus {
+  border-color: #FF6B35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.card-element-container .StripeElement--invalid {
+  border-color: #dc3545;
+}
+
+/* Error Message */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: #fee;
+  border-left: 4px solid #dc3545;
+  border-radius: 4px;
+  color: #dc3545;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.error-message svg {
+  flex-shrink: 0;
+}
+
+/* Pay Button */
+.pay-button {
+  width: 100%;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pay-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.pay-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pay-button .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Secure Payment Badge */
+.secure-payment-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  color: #6c757d;
+  font-size: 13px;
+}
+
+.secure-payment-badge svg {
+  color: #10b981;
+}
+
+/* Payment Info */
+.payment-info {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.info-item svg {
+  flex-shrink: 0;
+  color: #FF6B35;
+  margin-top: 2px;
+}
+
+.info-item strong {
+  display: block;
+  color: #2C3E50;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.info-item p {
+  color: #6c757d;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stripe-checkout-container {
+    padding: 16px;
+  }
+
+  .stripe-form {
+    padding: 20px;
+  }
+
+  .payment-header h2 {
+    font-size: 20px;
+  }
+
+  .pay-button {
+    font-size: 15px;
+    padding: 12px 20px;
+  }
+}
+
+/* Payment Success Animation */
+@keyframes successPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.payment-success {
+  animation: successPulse 0.5s ease-in-out;
+}

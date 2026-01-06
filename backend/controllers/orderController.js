@@ -1,27 +1,29 @@
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
+const { emailTemplates, sendEmail } = require('../services/emailService');
+const logger = require('../utils/logger');
 
-// Shipping options configuration
+// Shipping options configuration - Pakistani Rupees (PKR)
 const SHIPPING_OPTIONS = [
   {
     id: "standard",
     name: "Standard Shipping",
-    price: 150,
+    price: 300, // PKR 300
     estimatedDays: "5-7 business days",
     description: "Regular delivery within Pakistan"
   },
   {
     id: "express",
     name: "Express Shipping", 
-    price: 300,
+    price: 700, // PKR 700
     estimatedDays: "2-3 business days",
     description: "Fast delivery to major cities"
   },
   {
     id: "overnight",
     name: "Overnight Delivery",
-    price: 500,
+    price: 2000, // PKR 2000
     estimatedDays: "Next business day",
     description: "Available for Karachi, Lahore, and Islamabad"
   }
@@ -324,6 +326,18 @@ exports.placeOrder = async (req, res) => {
     // Clear user's cart
     await Cart.findOneAndDelete({ user: userId });
 
+    // Send order confirmation email
+    try {
+      const User = require('../models/User');
+      const userDetails = await User.findById(userId);
+      const orderConfirmationEmail = emailTemplates.orderConfirmation(newOrder, userDetails);
+      await sendEmail(userDetails.email, `Order Confirmation - ${newOrder.trackingNumber}`, orderConfirmationEmail);
+      logger.info(`Order confirmation email sent to ${userDetails.email} for order ${newOrder.trackingNumber}`);
+    } catch (error) {
+      logger.error(`Failed to send order confirmation email: ${error.message}`);
+      // Don't fail the order if email fails
+    }
+
     res.status(201).json({
       success: true,
       message: "Order placed successfully!",
@@ -554,6 +568,7 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     // Update order status
+    const previousStatus = order.orderStatus;
     order.orderStatus = status;
     
     // Handle specific status updates
@@ -577,6 +592,32 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     await order.save();
+
+    // Send status update emails
+    try {
+      const User = require('../models/User');
+      const userDetails = await User.findById(order.user);
+      
+      if (status === "shipped" && previousStatus !== "shipped") {
+        const trackingInfo = {
+          courierService: note || "Standard Shipping",
+          courierTrackingNumber: order.trackingNumber,
+          expectedDeliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) // 5 days from now
+        };
+        const shippedEmail = emailTemplates.orderShipped(order, userDetails, trackingInfo);
+        await sendEmail(userDetails.email, `Order Shipped - ${order.trackingNumber}`, shippedEmail);
+        logger.info(`Order shipped email sent to ${userDetails.email} for order ${order.trackingNumber}`);
+      }
+      
+      if (status === "delivered" && previousStatus !== "delivered") {
+        const deliveredEmail = emailTemplates.orderDelivered(order, userDetails);
+        await sendEmail(userDetails.email, `Order Delivered - ${order.trackingNumber}`, deliveredEmail);
+        logger.info(`Order delivered email sent to ${userDetails.email} for order ${order.trackingNumber}`);
+      }
+    } catch (error) {
+      logger.error(`Failed to send order status email: ${error.message}`);
+      // Don't fail the status update if email fails
+    }
     
     res.status(200).json({ 
       success: true,

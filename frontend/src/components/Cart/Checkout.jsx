@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   ShoppingCart, Truck, CreditCard, MapPin, Phone, Mail, User, Package, 
   Shield, CheckCircle, Minus, Plus, X, Gift, Star, Clock, AlertCircle,
@@ -6,36 +7,39 @@ import {
   TrendingUp, Award, Zap, Heart, Tag, DollarSign, Home, Building,
   Loader2, RefreshCw, MessageSquare, Bell, Settings, HelpCircle
 } from 'lucide-react';
+import { useCurrency } from '../../context/CurrencyContext';
 
-// USD to PKR conversion rate
-const USD_TO_PKR = 278.50;
-
-// Toast Component
+// Professional Toast Component
 const Toast = ({ type, message, onClose }) => {
   useEffect(() => {
-    const timer = setTimeout(onClose, 4000);
+    const timer = setTimeout(onClose, 3500);
     return () => clearTimeout(timer);
   }, [onClose]);
 
   const styles = {
-    success: 'bg-emerald-500',
-    error: 'bg-red-500',
-    info: 'bg-blue-500',
-    warning: 'bg-amber-500'
+    success: 'bg-gradient-to-r from-green-500 to-emerald-600 border-green-400',
+    error: 'bg-gradient-to-r from-red-500 to-red-600 border-red-400',
+    info: 'bg-gradient-to-r from-orange-500 to-orange-600 border-orange-400',
+    warning: 'bg-gradient-to-r from-amber-500 to-yellow-600 border-amber-400'
   };
 
   const icons = {
-    success: <CheckCircle size={18} />,
-    error: <AlertCircle size={18} />,
-    info: <Info size={18} />,
-    warning: <AlertCircle size={18} />
+    success: <CheckCircle size={20} className="animate-bounce-once" />,
+    error: <AlertCircle size={20} className="animate-shake" />,
+    info: <Info size={20} />,
+    warning: <AlertCircle size={20} className="animate-pulse" />
   };
 
   return (
-    <div className={`fixed top-4 right-4 z-[9999] ${styles[type]} text-white px-5 py-3.5 rounded-xl shadow-2xl backdrop-blur-sm bg-opacity-95 flex items-center space-x-3 max-w-sm animate-slide-in`}>
-      {icons[type]}
-      <p className="font-medium text-sm flex-1">{message}</p>
-      <button onClick={onClose} className="hover:opacity-70 transition-opacity">
+    <div className={`fixed top-6 right-6 z-[9999] ${styles[type]} text-white px-6 py-4 rounded-2xl shadow-2xl border-2 flex items-center space-x-3 max-w-md animate-toast-slide transform hover:scale-105 transition-transform`}>
+      <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+        {icons[type]}
+      </div>
+      <p className="font-semibold text-sm flex-1">{message}</p>
+      <button 
+        onClick={onClose} 
+        className="flex-shrink-0 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all"
+      >
         <X size={16} />
       </button>
     </div>
@@ -43,6 +47,8 @@ const Toast = ({ type, message, onClose }) => {
 };
 
 const CheckoutShipping = () => {
+  const navigate = useNavigate();
+  const { formatPrice, currency } = useCurrency();
   const [currentStep, setCurrentStep] = useState(1);
   const [cartItems, setCartItems] = useState([]);
   const [shippingOptions, setShippingOptions] = useState([]);
@@ -121,21 +127,6 @@ const CheckoutShipping = () => {
     }
   };
 
-  // Convert USD to PKR
-  const convertToPKR = (usdAmount) => {
-    return Math.round(usdAmount * USD_TO_PKR);
-  };
-
-  // Format currency
-  const formatPKR = (amount) => {
-    return new Intl.NumberFormat('en-PK', {
-      style: 'currency',
-      currency: 'PKR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
-
   // Fetch cart items
   const fetchCartItems = async () => {
     try {
@@ -145,10 +136,8 @@ const CheckoutShipping = () => {
         const formattedItems = response.items.map(item => ({
           id: item.product._id,
           name: item.product.name,
-          priceUSD: item.product.price,
-          pricePKR: convertToPKR(item.product.discountedPrice > 0 ? item.product.discountedPrice : item.product.price),
-          originalPriceUSD: item.product.discountedPrice > 0 ? item.product.price : null,
-          originalPricePKR: item.product.discountedPrice > 0 ? convertToPKR(item.product.price) : null,
+          price: item.product.discountedPrice > 0 ? item.product.discountedPrice : item.product.price, // USD
+          originalPrice: item.product.discountedPrice > 0 ? item.product.price : null, // USD
           quantity: item.quantity,
           image: item.product.images?.[0]?.url || item.product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100",
           rating: item.product.rating || 0,
@@ -177,8 +166,7 @@ const CheckoutShipping = () => {
       if (response.success && response.data) {
         const formattedOptions = response.data.map(option => ({
           ...option,
-          priceUSD: option.price,
-          pricePKR: convertToPKR(option.price),
+          price: option.price, // USD price from backend
           icon: option.id === 'standard' ? Package : option.id === 'express' ? Truck : Clock,
           premium: option.id === 'overnight'
         }));
@@ -190,15 +178,14 @@ const CheckoutShipping = () => {
       }
     } catch (error) {
       console.error('Error fetching shipping options:', error);
-      // Fallback shipping options
+      // Fallback shipping options - USD prices
       const fallbackOptions = [
         {
           id: 'standard',
           name: 'Standard Shipping',
-          description: 'Delivery in 5-7 business days',
-          estimatedDays: '5-7 days',
-          priceUSD: 0,
-          pricePKR: 0,
+          description: 'Regular delivery within Pakistan',
+          estimatedDays: '5-7 business days',
+          price: 1.08, // ~300 PKR in USD
           icon: Package,
           premium: false
         },
@@ -206,9 +193,8 @@ const CheckoutShipping = () => {
           id: 'express',
           name: 'Express Shipping',
           description: 'Fast delivery in 2-3 business days',
-          estimatedDays: '2-3 days',
-          priceUSD: 10,
-          pricePKR: convertToPKR(10),
+          estimatedDays: '2-3 business days',
+          price: 2.51, // ~700 PKR in USD
           icon: Truck,
           premium: false
         },
@@ -216,9 +202,8 @@ const CheckoutShipping = () => {
           id: 'overnight',
           name: 'Overnight Shipping',
           description: 'Next day delivery',
-          estimatedDays: '1 day',
-          priceUSD: 25,
-          pricePKR: convertToPKR(25),
+          estimatedDays: 'Next business day',
+          price: 7.18, // ~2000 PKR in USD
           icon: Clock,
           premium: true
         }
@@ -228,48 +213,46 @@ const CheckoutShipping = () => {
     }
   };
 
-  // Calculate order summary
+  // Calculate order summary (all in USD)
   const calculateOrderSummary = useCallback(() => {
-    const subtotalPKR = cartItems.reduce((sum, item) => sum + (item.pricePKR * item.quantity), 0);
-    const shippingCostPKR = shippingOptions.find(opt => opt.id === selectedShipping)?.pricePKR || 0;
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shippingCost = shippingOptions.find(opt => opt.id === selectedShipping)?.price || 0;
     
-    let discountPKR = 0;
+    let discount = 0;
     if (promoApplied && promoCode) {
-      const subtotalUSD = cartItems.reduce((sum, item) => sum + (item.priceUSD * item.quantity), 0);
-      
       switch (promoCode.toUpperCase()) {
         case 'SAVE10':
-          discountPKR = Math.round(subtotalPKR * 0.1);
+          discount = subtotal * 0.1;
           break;
         case 'SAVE15':
-          if (subtotalUSD >= 10) { // $10 = ~2780 PKR
-            discountPKR = Math.round(subtotalPKR * 0.15);
+          if (subtotal >= 10) {
+            discount = subtotal * 0.15;
           }
           break;
         case 'FREESHIP':
-          if (subtotalUSD >= 7) { // $7 = ~1950 PKR
-            discountPKR = shippingCostPKR;
+          if (subtotal >= 7) {
+            discount = shippingCost;
           }
           break;
         case 'WELCOME':
-          if (subtotalUSD >= 3.5) { // $3.5 = ~975 PKR
-            discountPKR = convertToPKR(0.72); // ~200 PKR
+          if (subtotal >= 3.5) {
+            discount = 0.72; // ~200 PKR in USD
           }
           break;
         default:
-          discountPKR = 0;
+          discount = 0;
       }
     }
     
-    const taxPKR = Math.round(subtotalPKR * 0.05); // 5% tax
-    const totalPKR = subtotalPKR + shippingCostPKR + taxPKR - discountPKR;
+    const tax = subtotal * 0.05; // 5% tax
+    const total = subtotal + shippingCost + tax - discount;
 
     return {
-      subtotal: subtotalPKR,
-      shipping: shippingCostPKR,
-      discount: discountPKR,
-      tax: taxPKR,
-      total: totalPKR,
+      subtotal,
+      shipping: shippingCost,
+      discount,
+      tax,
+      total,
       itemCount: cartItems.reduce((sum, item) => sum + item.quantity, 0)
     };
   }, [cartItems, selectedShipping, shippingOptions, promoApplied, promoCode]);
@@ -425,7 +408,6 @@ const CheckoutShipping = () => {
     if (validateStep(currentStep)) {
       setCurrentStep(prev => Math.min(prev + 1, 4));
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      showToast('success', `Step ${currentStep + 1} of 4`);
     }
   };
 
@@ -455,12 +437,29 @@ const CheckoutShipping = () => {
       });
       
       if (response.success) {
-        setOrderNumber(response.data?.orderNumber || response.data?.trackingNumber || `ORD-${Date.now()}`);
-        setOrderPlaced(true);
-        showToast('success', 'Order placed successfully!');
+        const orderId = response.data?.orderId || response.data?._id;
+        const orderNum = response.data?.orderNumber || response.data?.trackingNumber || `ORD-${Date.now()}`;
+        const totalAmount = response.data?.totalAmount || orderSummary.total;
         
-        // Clear cart
-        setCartItems([]);
+        setOrderNumber(orderNum);
+        
+        // If payment method is stripe, redirect to payment page
+        if (paymentMethod === 'stripe') {
+          navigate('/payment', {
+            state: {
+              orderId: orderId,
+              amount: totalAmount,
+              orderNumber: orderNum
+            }
+          });
+        } else {
+          // For COD and other methods, show success
+          setOrderPlaced(true);
+          showToast('success', 'Order placed successfully!');
+          
+          // Clear cart
+          setCartItems([]);
+        }
       } else {
         throw new Error(response.message || 'Failed to place order');
       }
@@ -533,7 +532,7 @@ const CheckoutShipping = () => {
             </div>
             <div className="p-3 sm:p-4 bg-green-50 rounded-lg sm:rounded-xl border border-green-200">
               <Award className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mx-auto mb-2" />
-              <p className="text-green-800 font-medium">Total: {formatPKR(orderSummary.total)}</p>
+              <p className="text-green-800 font-medium">Total: {formatPrice(orderSummary.total)}</p>
             </div>
           </div>
         </div>
@@ -595,16 +594,16 @@ const CheckoutShipping = () => {
                     <div className="flex items-center">
                       <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-2xl border-2 transition-all duration-300 ${
                         isCompleted ? 'bg-green-600 border-green-600 text-white shadow-lg' :
-                        isActive ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-110' :
+                        isActive ? 'bg-gradient-to-r from-orange-600 to-red-600 border-orange-600 text-white shadow-lg scale-110' :
                         'bg-gray-100 border-gray-300 text-gray-400'
                       }`}>
                         {isCompleted ? <CheckCircle className="w-7 h-7" /> : <Icon className="w-7 h-7" />}
                       </div>
                       <div className="ml-4">
-                        <p className={`text-sm font-bold ${isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-500'}`}>
+                        <p className={`text-sm font-bold ${isActive ? 'text-orange-600' : isCompleted ? 'text-green-600' : 'text-gray-500'}`}>
                           {step.title}
                         </p>
-                        <p className={`text-xs ${isActive ? 'text-blue-500' : isCompleted ? 'text-green-500' : 'text-gray-400'}`}>
+                        <p className={`text-xs ${isActive ? 'text-orange-500' : isCompleted ? 'text-green-500' : 'text-gray-400'}`}>
                           {step.subtitle}
                         </p>
                       </div>
@@ -626,7 +625,7 @@ const CheckoutShipping = () => {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-orange-600 to-red-600 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${(currentStep / 4) * 100}%` }}
               />
             </div>
@@ -725,17 +724,17 @@ const CheckoutShipping = () => {
                               
                               <div className="text-right">
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
-                                  {item.originalPricePKR && item.originalPricePKR > item.pricePKR && (
+                                  {item.originalPrice && item.originalPrice > item.price && (
                                     <span className="text-xs sm:text-sm text-gray-400 line-through">
-                                      {formatPKR(item.originalPricePKR * item.quantity)}
+                                      {formatPrice(item.originalPrice * item.quantity)}
                                     </span>
                                   )}
                                   <span className="text-lg sm:text-xl font-bold text-gray-900">
-                                    {formatPKR(item.pricePKR * item.quantity)}
+                                    {formatPrice(item.price * item.quantity)}
                                   </span>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-0.5">
-                                  {formatPKR(item.pricePKR)} each
+                                  {formatPrice(item.price)} each
                                 </p>
                               </div>
                             </div>
@@ -811,7 +810,7 @@ const CheckoutShipping = () => {
                         name="fullName"
                         value={shippingInfo.fullName}
                         onChange={handleInputChange}
-                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base ${
+                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:outline-none focus:border-orange-500 transition-all text-sm sm:text-base ${
                           errors.fullName ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="Enter your full name"
@@ -834,7 +833,7 @@ const CheckoutShipping = () => {
                         name="email"
                         value={shippingInfo.email}
                         onChange={handleInputChange}
-                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base ${
+                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:outline-none focus:border-orange-500 transition-all text-sm sm:text-base ${
                           errors.email ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="your@email.com"
@@ -857,7 +856,7 @@ const CheckoutShipping = () => {
                         name="phone"
                         value={shippingInfo.phone}
                         onChange={handleInputChange}
-                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base ${
+                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:outline-none focus:border-orange-500 transition-all text-sm sm:text-base ${
                           errors.phone ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="03XXXXXXXXX"
@@ -876,7 +875,7 @@ const CheckoutShipping = () => {
                         name="city"
                         value={shippingInfo.city}
                         onChange={handleInputChange}
-                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base ${
+                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:outline-none focus:border-orange-500 transition-all text-sm sm:text-base ${
                           errors.city ? 'border-red-500' : 'border-gray-300'
                         }`}
                       >
@@ -907,7 +906,7 @@ const CheckoutShipping = () => {
                         name="state"
                         value={shippingInfo.state}
                         onChange={handleInputChange}
-                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base ${
+                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:outline-none focus:border-orange-500 transition-all text-sm sm:text-base ${
                           errors.state ? 'border-red-500' : 'border-gray-300'
                         }`}
                       >
@@ -938,7 +937,7 @@ const CheckoutShipping = () => {
                         value={shippingInfo.address}
                         onChange={handleInputChange}
                         rows="3"
-                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base ${
+                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:outline-none focus:border-orange-500 transition-all text-sm sm:text-base ${
                           errors.address ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="House/Flat no, Street, Area, Landmarks"
@@ -958,7 +957,7 @@ const CheckoutShipping = () => {
                         name="postalCode"
                         value={shippingInfo.postalCode}
                         onChange={handleInputChange}
-                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base ${
+                        className={`w-full px-3 sm:px-4 py-3 sm:py-4 border-2 rounded-xl focus:outline-none focus:border-orange-500 transition-all text-sm sm:text-base ${
                           errors.postalCode ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="75500"
@@ -977,7 +976,7 @@ const CheckoutShipping = () => {
                           type="checkbox"
                           checked={saveAddress}
                           onChange={(e) => setSaveAddress(e.target.checked)}
-                          className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                          className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 rounded focus:outline-none focus:ring-0"
                         />
                         <span className="text-xs sm:text-sm text-gray-700 font-medium">Save this address for future orders</span>
                       </label>
@@ -1012,11 +1011,11 @@ const CheckoutShipping = () => {
                               <div className="flex-1 min-w-0">
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                                   <div className="flex items-center space-x-2">
-                                    <Icon className={`w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ${option.premium ? 'text-purple-500' : 'text-blue-500'}`} />
+                                    <Icon className={`w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ${option.premium ? 'text-red-500' : 'text-orange-500'}`} />
                                     <h3 className="font-bold text-gray-900 text-sm sm:text-lg">{option.name}</h3>
                                   </div>
                                   {option.premium && (
-                                    <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-semibold inline-block">
+                                    <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-semibold inline-block">
                                       PREMIUM
                                     </span>
                                   )}
@@ -1030,10 +1029,10 @@ const CheckoutShipping = () => {
                             </div>
                             <div className="text-right flex-shrink-0">
                               <p className="text-lg sm:text-2xl font-bold text-gray-900">
-                                {option.pricePKR === 0 ? (
+                                {option.price === 0 ? (
                                   <span className="text-green-600">FREE</span>
                                 ) : (
-                                  formatPKR(option.pricePKR)
+                                  formatPrice(option.price)
                                 )}
                               </p>
                             </div>
@@ -1060,23 +1059,68 @@ const CheckoutShipping = () => {
                 <div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-8">Payment & Final Review</h2>
                   
+                  {/* Currency Notice */}
+                  <div className="mb-6 sm:mb-8 bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                    <div className="flex items-start space-x-3">
+                      <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-semibold text-blue-900 mb-1">Payment Currency Information</p>
+                        <p className="text-sm text-blue-700">
+                          Prices are displayed in <span className="font-bold">{currency}</span>. Your payment will be processed in <span className="font-bold">USD</span>.
+                        </p>
+                        <p className="text-sm text-blue-600 mt-2 font-semibold">
+                          Total: {formatPrice(orderSummary.total)} ≈ ${orderSummary.total.toFixed(2)} USD
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Payment Methods */}
                   <div className="mb-6 sm:mb-8">
                     <button
                       onClick={() => toggleSection('paymentInfo')}
-                      className="w-full flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl mb-3"
+                      className="w-full flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl mb-3"
                     >
                       <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
-                        <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                        <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-orange-600" />
                         Payment Method
                       </h3>
-                      {expandedSections.paymentInfo ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                      {expandedSections.paymentInfo ? <ChevronUp className="w-5 h-5 text-orange-600" /> : <ChevronDown className="w-5 h-5 text-orange-600" />}
                     </button>
                     
                     {expandedSections.paymentInfo && (
                       <div className="space-y-2 sm:space-y-3">
+                        {/* Stripe Payment */}
                         <label className={`block p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                          paymentMethod === 'cash_on_delivery' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                          paymentMethod === 'stripe' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-200'
+                        }`}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center flex-1">
+                              <input
+                                type="radio"
+                                name="payment"
+                                value="stripe"
+                                checked={paymentMethod === 'stripe'}
+                                onChange={(e) => setPaymentMethod(e.target.value)}
+                                className="w-4 h-4 sm:w-5 sm:h-5 mr-3 flex-shrink-0"
+                              />
+                              <div className="flex-1">
+                                <p className="font-semibold text-sm sm:text-base text-gray-900">Credit/Debit Card</p>
+                                <p className="text-xs sm:text-sm text-gray-600">Secure payment via Stripe</p>
+                              </div>
+                            </div>
+                            <div className="bg-blue-100 px-2 sm:px-3 py-1 rounded-full ml-2">
+                              <span className="text-blue-700 text-xs font-bold flex items-center">
+                                <Shield size={12} className="mr-1" />
+                                SECURE
+                              </span>
+                            </div>
+                          </div>
+                        </label>
+                        
+                        {/* Cash on Delivery */}
+                        <label className={`block p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                          paymentMethod === 'cash_on_delivery' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-200'
                         }`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center flex-1">
@@ -1094,46 +1138,13 @@ const CheckoutShipping = () => {
                               </div>
                             </div>
                             <div className="bg-green-100 px-2 sm:px-3 py-1 rounded-full ml-2">
-                              <span className="text-green-700 text-xs font-bold">POPULAR</span>
+                              <span className="text-green-700 text-xs font-bold flex items-center">
+                                <TrendingUp size={12} className="mr-1" />
+                                POPULAR
+                              </span>
                             </div>
                           </div>
                         </label>
-                        
-                        {['credit_card', 'jazzcash', 'easypaisa', 'bank_transfer'].map((method) => {
-                          const methodNames = {
-                            credit_card: 'Credit/Debit Card',
-                            jazzcash: 'JazzCash',
-                            easypaisa: 'Easypaisa',
-                            bank_transfer: 'Bank Transfer'
-                          };
-                          const methodDescs = {
-                            credit_card: 'Pay with Visa, MasterCard',
-                            jazzcash: 'Pay via JazzCash wallet',
-                            easypaisa: 'Pay via Easypaisa wallet',
-                            bank_transfer: 'Direct bank transfer'
-                          };
-                          
-                          return (
-                            <label key={method} className={`block p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                              paymentMethod === method ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-                            }`}>
-                              <div className="flex items-center">
-                                <input
-                                  type="radio"
-                                  name="payment"
-                                  value={method}
-                                  checked={paymentMethod === method}
-                                  onChange={(e) => setPaymentMethod(e.target.value)}
-                                  className="w-4 h-4 sm:w-5 sm:h-5 mr-3"
-                                />
-                                <div>
-                                  <p className="font-semibold text-sm sm:text-base text-gray-900">{methodNames[method]}</p>
-                                  <p className="text-xs sm:text-sm text-gray-600">{methodDescs[method]}</p>
-                                </div>
-                              </div>
-                            </label>
-                          );
-                        })}
                       </div>
                     )}
                   </div>
@@ -1142,13 +1153,13 @@ const CheckoutShipping = () => {
                   <div className="mb-6 sm:mb-8">
                     <button
                       onClick={() => toggleSection('orderSummary')}
-                      className="w-full flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl mb-3"
+                      className="w-full flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl mb-3"
                     >
                       <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
-                        <Package className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                        <Package className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-orange-600" />
                         Order Summary ({cartItems.length} items)
                       </h3>
-                      {expandedSections.orderSummary ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                      {expandedSections.orderSummary ? <ChevronUp className="w-5 h-5 text-orange-600" /> : <ChevronDown className="w-5 h-5 text-orange-600" />}
                     </button>
                     
                     {expandedSections.orderSummary && (
@@ -1160,7 +1171,7 @@ const CheckoutShipping = () => {
                               <p className="font-semibold text-sm sm:text-base text-gray-900 line-clamp-1">{item.name}</p>
                               <p className="text-xs sm:text-sm text-gray-600">Qty: {item.quantity}</p>
                             </div>
-                            <p className="font-semibold text-sm sm:text-base text-gray-900 flex-shrink-0">{formatPKR(item.pricePKR * item.quantity)}</p>
+                            <p className="font-semibold text-sm sm:text-base text-gray-900 flex-shrink-0">{formatPrice(item.price * item.quantity)}</p>
                           </div>
                         ))}
                       </div>
@@ -1236,7 +1247,7 @@ const CheckoutShipping = () => {
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows="3"
-                      className="w-full px-3 sm:px-4 py-3 sm:py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-3 sm:py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 transition-all text-sm sm:text-base"
                       placeholder="Any special delivery instructions, preferred delivery time, etc..."
                     />
                   </div>
@@ -1248,7 +1259,7 @@ const CheckoutShipping = () => {
                         type="checkbox"
                         checked={agreeToTerms}
                         onChange={(e) => setAgreeToTerms(e.target.checked)}
-                        className="mt-1 w-4 h-4 sm:w-5 sm:h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 flex-shrink-0"
+                        className="mt-1 w-4 h-4 sm:w-5 sm:h-5 text-orange-600 rounded focus:outline-none focus:ring-0 flex-shrink-0"
                       />
                       <div className="text-xs sm:text-sm text-gray-700">
                         <p>I agree to the <button type="button" className="text-blue-600 hover:underline font-semibold">Terms & Conditions</button> and <button type="button" className="text-blue-600 hover:underline font-semibold">Privacy Policy</button>. I confirm that all information provided is accurate and I authorize the processing of this order.</p>
@@ -1291,7 +1302,7 @@ const CheckoutShipping = () => {
                     className={`w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
                       cartItems.length === 0
                         ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg transform hover:scale-105'
+                        : 'bg-gradient-to-r from-orange-600 to-red-600 text-white hover:shadow-lg transform hover:scale-105'
                     }`}
                   >
                     Continue to Next Step
@@ -1315,7 +1326,7 @@ const CheckoutShipping = () => {
                     ) : (
                       <>
                         <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 inline mr-2" />
-                        Place Order - {formatPKR(orderSummary.total)}
+                        Place Order - {formatPrice(orderSummary.total)}
                       </>
                     )}
                   </button>
@@ -1344,7 +1355,7 @@ const CheckoutShipping = () => {
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                     placeholder="Enter code"
-                    className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base disabled:bg-gray-100"
+                    className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 transition-all text-sm sm:text-base disabled:bg-gray-100"
                     disabled={promoApplied}
                   />
                   {!promoApplied ? (
@@ -1391,7 +1402,7 @@ const CheckoutShipping = () => {
                         <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{item.name}</p>
                         <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
                       </div>
-                      <p className="text-xs sm:text-sm font-semibold text-gray-900 flex-shrink-0">{formatPKR(item.pricePKR * item.quantity)}</p>
+                      <p className="text-xs sm:text-sm font-semibold text-gray-900 flex-shrink-0">{formatPrice(item.price * item.quantity)}</p>
                     </div>
                   ))}
                 </div>
@@ -1401,7 +1412,7 @@ const CheckoutShipping = () => {
               <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6 pb-4 sm:pb-6 border-b-2 border-gray-200">
                 <div className="flex justify-between text-sm sm:text-base text-gray-600">
                   <span>Subtotal ({orderSummary.itemCount} items)</span>
-                  <span className="font-semibold">{formatPKR(orderSummary.subtotal)}</span>
+                  <span className="font-semibold">{formatPrice(orderSummary.subtotal)}</span>
                 </div>
                 
                 <div className="flex justify-between text-sm sm:text-base text-gray-600">
@@ -1410,11 +1421,7 @@ const CheckoutShipping = () => {
                     Shipping
                   </span>
                   <span className="font-semibold">
-                    {orderSummary.shipping === 0 ? (
-                      <span className="text-green-600">FREE</span>
-                    ) : (
-                      formatPKR(orderSummary.shipping)
-                    )}
+                    {formatPrice(orderSummary.shipping)}
                   </span>
                 </div>
                 
@@ -1423,26 +1430,42 @@ const CheckoutShipping = () => {
                     <Tag className="w-4 h-4 mr-1" />
                     Tax (5%)
                   </span>
-                  <span className="font-semibold">{formatPKR(orderSummary.tax)}</span>
+                  <span className="font-semibold">{formatPrice(orderSummary.tax)}</span>
                 </div>
                 
                 {orderSummary.discount > 0 && (
-                  <div className="flex justify-between text-sm sm:text-base text-green-600">
-                    <span className="font-semibold">Promo Discount</span>
-                    <span className="font-bold">-{formatPKR(orderSummary.discount)}</span>
+                  <div className="flex justify-between text-sm sm:text-base">
+                    <span className="font-semibold text-green-600">Promo Discount</span>
+                    <span className="font-bold text-green-600">-{formatPrice(orderSummary.discount)}</span>
                   </div>
                 )}
               </div>
 
+              {/* Estimated Delivery */}
+              {selectedShipping && (
+                <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-bold text-blue-900">Estimated Delivery</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-blue-800">
+                    {shippingOptions.find(opt => opt.id === selectedShipping)?.estimatedDays || 'Select shipping method'}
+                  </p>
+                </div>
+              )}
+
               {/* Total Amount */}
-              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border-2 border-blue-200">
-                <div className="flex justify-between items-center">
+              <div className="mb-4 sm:mb-6 p-4 sm:p-5 bg-gradient-to-r from-orange-50 via-red-50 to-orange-50 rounded-2xl border-2 border-orange-300 shadow-lg">
+                <div className="flex justify-between items-center mb-2">
                   <span className="text-base sm:text-lg font-bold text-gray-900">Total Amount</span>
-                  <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    {formatPKR(orderSummary.total)}
+                  <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                    {formatPrice(orderSummary.total)}
                   </span>
                 </div>
-                <p className="text-xs text-gray-600 mt-1">Including all taxes and fees</p>
+                <div className="flex items-center justify-between text-xs text-gray-600 pt-2 border-t border-orange-200">
+                  <span>Including all taxes and fees</span>
+                  <span className="font-semibold">≈ ${orderSummary.total.toFixed(2)} USD</span>
+                </div>
               </div>
 
               {/* Savings Badge */}
@@ -1450,7 +1473,7 @@ const CheckoutShipping = () => {
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 border-2 border-green-200">
                   <div className="flex items-center space-x-2 text-green-700">
                     <Award className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="text-xs sm:text-sm font-bold">You're saving {formatPKR(orderSummary.discount)}!</span>
+                    <span className="text-xs sm:text-sm font-bold">You're saving {formatPrice(orderSummary.discount)}!</span>
                   </div>
                 </div>
               )}
@@ -1477,15 +1500,15 @@ const CheckoutShipping = () => {
                     </div>
                     <div className="flex justify-between items-center p-2 bg-amber-100 rounded-lg">
                       <span className="font-bold text-amber-900">SAVE15</span>
-                      <span className="text-amber-700">15% off on Rs. 2,780+</span>
+                      <span className="text-amber-700">15% off on $10+</span>
                     </div>
                     <div className="flex justify-between items-center p-2 bg-amber-100 rounded-lg">
                       <span className="font-bold text-amber-900">FREESHIP</span>
-                      <span className="text-amber-700">Free ship Rs. 1,950+</span>
+                      <span className="text-amber-700">Free ship $7+</span>
                     </div>
                     <div className="flex justify-between items-center p-2 bg-amber-100 rounded-lg">
                       <span className="font-bold text-amber-900">WELCOME</span>
-                      <span className="text-amber-700">Rs. 200 off Rs. 975+</span>
+                      <span className="text-amber-700">$0.72 off $3.50+</span>
                     </div>
                   </div>
                 </div>
@@ -1531,6 +1554,40 @@ const CheckoutShipping = () => {
 
       {/* Custom Styles */}
       <style jsx>{`
+        @keyframes toast-slide {
+          from {
+            opacity: 0;
+            transform: translateX(100%) scale(0.8);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+        }
+        
+        @keyframes bounce-once {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+        
+        .animate-toast-slide {
+          animation: toast-slide 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .animate-bounce-once {
+          animation: bounce-once 0.6s ease-out;
+        }
+        
+        .animate-shake {
+          animation: shake 0.4s ease-in-out;
+        }
+        
         @keyframes slide-in {
           from {
             opacity: 0;
@@ -1586,12 +1643,12 @@ const CheckoutShipping = () => {
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: linear-gradient(to bottom, #3b82f6, #6366f1);
+          background: linear-gradient(to bottom, #FF6B35, #EF4444);
           border-radius: 10px;
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to bottom, #2563eb, #4f46e5);
+          background: linear-gradient(to bottom, #EF4444, #DC2626);
         }
         
         .line-clamp-1 {

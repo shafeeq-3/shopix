@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useCurrency } from '../../context/CurrencyContext';
 import { FaShoppingCart, FaTimes, FaTrash, FaMinus, FaPlus, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import { ShoppingCart } from 'lucide-react';
 
@@ -65,6 +66,7 @@ const useToast = () => {
 
 const CartSidebar = () => {
   const { removeItem, updateCart, cart, totalAmount } = useAuth();
+  const { formatPrice } = useCurrency();
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [loadingItems, setLoadingItems] = useState(new Set());
@@ -304,7 +306,7 @@ const CartSidebar = () => {
                           </h3>
                           <div className="flex items-center gap-2 mb-3">
                             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                              ${Number(item.product.price || 0).toFixed(2)}
+                              {formatPrice(Number(item.product.price || 0))}
                             </span>
                             <span className="text-sm text-gray-500">each</span>
                           </div>
@@ -338,7 +340,7 @@ const CartSidebar = () => {
                             <div className="text-right">
                               <p className="text-sm text-gray-500">Subtotal</p>
                               <p className="font-bold text-lg text-gray-900">
-                                ${(Number(item.product.price || 0) * item.quantity).toFixed(2)}
+                                {formatPrice(Number(item.product.price || 0) * item.quantity)}
                               </p>
                             </div>
                           </div>
