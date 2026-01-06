@@ -25,12 +25,19 @@ console.log('GOOGLE_CLIENT_SECRET:', GOOGLE_CLIENT_SECRET ? '✅ Found' : '❌ M
 
 if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
   try {
+    // Use absolute URL for production (Vercel)
+    const callbackURL = process.env.NODE_ENV === 'production' 
+      ? 'https://shopix-backendd.vercel.app/api/auth/google/callback'
+      : '/api/auth/google/callback';
+    
+    console.log('🔗 OAuth Callback URL:', callbackURL);
+    
     passport.use(
       new GoogleStrategy(
         {
           clientID: GOOGLE_CLIENT_ID,
           clientSecret: GOOGLE_CLIENT_SECRET,
-          callbackURL: '/api/auth/google/callback',
+          callbackURL: callbackURL,
           proxy: true,
           // Professional OAuth settings
           accessType: 'offline',
