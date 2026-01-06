@@ -8,6 +8,16 @@
   ],
   "routes": [
     {
+      "src": "/api/auth/google/callback",
+      "dest": "/backend/server.js",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "src": "/api/auth/google",
+      "dest": "/backend/server.js",
+      "methods": ["GET"]
+    },
+    {
       "src": "/uploads/(.*)",
       "dest": "/backend/server.js"
     },
@@ -30,5 +40,24 @@
   ],
   "env": {
     "NODE_ENV": "production"
-  }
+  },
+  "headers": [
+    {
+      "source": "/api/auth/google/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ]
 }
