@@ -11,6 +11,10 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful logins
+  // Fix for Vercel proxy
+  keyGenerator: (req) => {
+    return req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.ip || 'unknown';
+  }
 });
 
 // Register rate limiter - 3 accounts per hour per IP
@@ -23,6 +27,9 @@ const registerLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    return req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.ip || 'unknown';
+  }
 });
 
 // Password reset rate limiter - 3 attempts per hour
@@ -35,6 +42,9 @@ const passwordResetLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    return req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.ip || 'unknown';
+  }
 });
 
 // General API rate limiter - 100 requests per 15 minutes
@@ -47,6 +57,9 @@ const apiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    return req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.ip || 'unknown';
+  }
 });
 
 module.exports = {
