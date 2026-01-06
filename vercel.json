@@ -2,30 +2,30 @@
   "version": 2,
   "builds": [
     {
-      "src": "server.js",
+      "src": "backend/server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/uploads/(.*)",
-      "dest": "/server.js"
+      "dest": "/backend/server.js"
     },
     {
       "src": "/api/(.*)",
-      "dest": "/server.js"
+      "dest": "/backend/server.js"
     },
     {
       "src": "/health",
-      "dest": "/server.js"
+      "dest": "/backend/server.js"
     },
     {
       "src": "/",
-      "dest": "/server.js"
+      "dest": "/backend/server.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/server.js"
+      "dest": "/backend/server.js"
     }
   ],
   "env": {
