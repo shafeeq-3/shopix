@@ -2,7 +2,16 @@
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 
+// Cache connection for serverless
+let cachedConnection = null;
+
 const connectDB = async (retries = 3) => {
+  // Return cached connection for serverless (Vercel)
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    logger.info('Using cached MongoDB connection');
+    return cachedConnection;
+  }
+
   try {
     const mongoURI = process.env.MONGO_URI;
     
@@ -16,7 +25,11 @@ const connectDB = async (retries = 3) => {
     const conn = await mongoose.connect(mongoURI, {
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      minPoolSize: 2,
     });
+
+    cachedConnection = conn;
 
     logger.info('MongoDB Connected Successfully!');
     logger.info(`Host: ${conn.connection.host}`);
@@ -25,22 +38,28 @@ const connectDB = async (retries = 3) => {
     // Handle connection events
     mongoose.connection.on('error', (err) => {
       console.error('❌ MongoDB runtime error:', err);
+      cachedConnection = null;
     });
 
     mongoose.connection.on('disconnected', () => {
       logger.warn('MongoDB disconnected');
+      cachedConnection = null;
     });
 
     mongoose.connection.on('reconnected', () => {
       logger.info('MongoDB reconnected');
     });
 
-    // Handle app termination
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      logger.info('MongoDB connection closed through app termination');
-      process.exit(0);
-    });
+    // Handle app termination (only in non-serverless environments)
+    if (process.env.NODE_ENV !== 'production') {
+      process.on('SIGINT', async () => {
+        await mongoose.connection.close();
+        logger.info('MongoDB connection closed through app termination');
+        process.exit(0);
+      });
+    }
+
+    return conn;
 
   } catch (error) {
     console.error(`\n❌ Connection Failed (${retries} retries left)`);
@@ -56,12 +75,10 @@ const connectDB = async (retries = 3) => {
       console.error('   → Wait a few minutes after adding IP\n');
       
       console.error('3️⃣  WRONG CREDENTIALS in MONGO_URI');
-      console.error('   → Check username/password in .env file');
-      console.error('   → Password mein special characters (@, :, /) encode karein\n');
+      console.error('   → Check username/password in .env file\n');
       
       console.error('4️⃣  VPN/FIREWALL BLOCKING CONNECTION');
-      console.error('   → Try disabling VPN temporarily');
-      console.error('   → Check Windows Firewall settings\n');
+      console.error('   → Try disabling VPN temporarily\n');
       
       console.error('5️⃣  NETWORK ACCESS NOT CONFIGURED');
       console.error('   → Atlas → Network Access → Add IP: 0.0.0.0/0\n');
@@ -73,7 +90,13 @@ const connectDB = async (retries = 3) => {
       return connectDB(retries - 1);
     }
     
-    console.error('❌ All connection attempts failed. Server will exit.\n');
+    console.error('❌ All connection attempts failed.\n');
+    
+    // In serverless, don't exit process
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
+    
     process.exit(1);
   }
 };

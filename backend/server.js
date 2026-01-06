@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 
 // Load environment variables FIRST
 dotenv.config();
@@ -90,22 +91,25 @@ app.get("/", (req, res) => {
     message: 'Server is healthy and running',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    service: 'MERN Ecommerce Backend'
+    service: 'MERN Ecommerce Backend',
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
 // ✅ ALAG HEALTH ENDPOINT (optional)
 app.get('/health', (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   res.status(200).json({ 
     status: 'OK', 
     message: 'Health check endpoint',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    database: dbStatus
   });
 });
 
-// Database connection
+// Database connection (will be cached in serverless)
 connectDB().catch(err => {
-  console.error('Database connection error:', err);
+  logger.error('Database connection error:', err);
 });
 
 // API Routes
@@ -144,18 +148,23 @@ if (fs.existsSync(buildPath)) {
 
 const PORT = process.env.PORT || 5000;
 
-// ✅ Server start
-const server = app.listen(PORT, '0.0.0.0', () => {
-  logger.info(`Server running on port ${PORT}`);
-  logger.info(`Root endpoint (Health check): http://0.0.0.0:${PORT}/`);
-  logger.info(`Health endpoint: http://0.0.0.0:${PORT}/health`);
-  logger.info('Server ready!');
-});
-
-// ✅ Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    logger.info('Process terminated');
+// ✅ Server start (only for local development)
+if (process.env.NODE_ENV !== 'production') {
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    logger.info(`Server running on port ${PORT}`);
+    logger.info(`Root endpoint (Health check): http://0.0.0.0:${PORT}/`);
+    logger.info(`Health endpoint: http://0.0.0.0:${PORT}/health`);
+    logger.info('Server ready!');
   });
-});
+
+  // ✅ Graceful shutdown
+  process.on('SIGTERM', () => {
+    logger.info('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+      logger.info('Process terminated');
+    });
+  });
+}
+
+// ✅ Export for Vercel serverless
+module.exports = app;
