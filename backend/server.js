@@ -115,13 +115,12 @@ connectDB().catch(err => {
 // API Routes
 // OAuth routes should NOT have rate limiting (Google redirects can trigger it)
 app.use('/api/auth', authRoutes); // Auth routes with OTP & 2FA (no rate limit on OAuth)
-app.use('/api/', apiLimiter); // Rate limiting for other API routes
-app.use('/api/users', require('./routes/userRoutes')); // User routes (register, login, profile)
-app.use('/api/products', require('./routes/productRoutes'));
-app.use('/api/cart', require('./routes/cartRoutes'));
-app.use("/api/orders", orderRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/payment', paymentRoutes); // Stripe payment routes
+app.use('/api/users', apiLimiter, require('./routes/userRoutes')); // User routes (register, login, profile)
+app.use('/api/products', apiLimiter, require('./routes/productRoutes'));
+app.use('/api/cart', apiLimiter, require('./routes/cartRoutes'));
+app.use("/api/orders", apiLimiter, orderRoutes);
+app.use('/api/admin', apiLimiter, adminRoutes);
+app.use('/api/payment', paymentRoutes); // Stripe payment routes (no rate limit for webhooks)
 
 // ✅ Static files (only in production when build exists)
 const buildPath = path.join(__dirname, '../frontend/build');
