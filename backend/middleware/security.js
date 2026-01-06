@@ -4,17 +4,11 @@ const hpp = require('hpp');
 
 // Security middleware configuration
 const securityMiddleware = (app) => {
-  // Helmet - Set security headers
+  // Helmet - Set security headers (relaxed for OAuth)
   app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
-      },
-    },
+    contentSecurityPolicy: false, // Disable CSP for OAuth compatibility
     crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: false,
   }));
 
   // Prevent NoSQL injection
@@ -31,7 +25,7 @@ const securityMiddleware = (app) => {
   // Additional security headers
   app.use((req, res, next) => {
     // Prevent clickjacking
-    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN'); // Changed from DENY to SAMEORIGIN for OAuth
     
     // Prevent MIME type sniffing
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -39,8 +33,8 @@ const securityMiddleware = (app) => {
     // Enable XSS filter
     res.setHeader('X-XSS-Protection', '1; mode=block');
     
-    // Referrer policy
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    // Referrer policy (relaxed for OAuth)
+    res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
     
     // Permissions policy
     res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
