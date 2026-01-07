@@ -20,6 +20,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const passwordRoutes = require('./routes/passwordRoutes');
 const authRoutes = require('./routes/authRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const emailRoutes = require('./routes/emailRoutes');
 
 const app = express();
 
@@ -125,6 +126,7 @@ app.use('/api/cart', apiLimiter, require('./routes/cartRoutes'));
 app.use("/api/orders", apiLimiter, orderRoutes);
 app.use('/api/admin', apiLimiter, adminRoutes);
 app.use('/api/payment', paymentRoutes); // Stripe payment routes (no rate limit for webhooks)
+app.use('/api/emails', apiLimiter, emailRoutes); // Email management routes
 
 // ✅ Static files (only in production when build exists)
 const buildPath = path.join(__dirname, '../frontend/build');
