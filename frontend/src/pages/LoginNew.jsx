@@ -298,7 +298,8 @@ const LoginNew = () => {
                   <span>OR</span>
                 </div>
 
-                {/* Google Sign In Button */}
+                {/* Google Sign In Button - Temporarily Disabled */}
+                {/* 
                 <button
                   type="button"
                   onClick={() => {
@@ -324,6 +325,18 @@ const LoginNew = () => {
                   </svg>
                   Continue with Google
                 </button>
+                */}
+
+                <div style={{
+                  padding: '12px',
+                  background: '#f3f4f6',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  fontSize: '14px',
+                  color: '#6b7280'
+                }}>
+                  Google Sign-In temporarily unavailable. Please use email/password.
+                </div>
 
                 <div className="form-footer">
                   <p>
