@@ -14,6 +14,8 @@ const validateRegistration = (req, res, next) => {
   const { name, email, password } = req.body;
   const errors = [];
 
+  console.log('Registration validation:', { name, email, hasPassword: !!password });
+
   // Name validation
   if (!name || name.trim().length < 2) {
     errors.push('Name must be at least 2 characters long');
@@ -39,6 +41,7 @@ const validateRegistration = (req, res, next) => {
   }
 
   if (errors.length > 0) {
+    console.log('Validation errors:', errors);
     return res.status(400).json({
       success: false,
       message: 'Validation failed',
@@ -50,6 +53,7 @@ const validateRegistration = (req, res, next) => {
   req.body.name = sanitizeInput(name);
   req.body.email = validator.normalizeEmail(email);
   
+  console.log('Validation passed');
   next();
 };
 

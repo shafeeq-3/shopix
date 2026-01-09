@@ -126,7 +126,16 @@ const RegisterNew = () => {
         navigate('/login');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      console.error('Registration error:', err.response?.data);
+      
+      if (err.response?.data?.errors) {
+        // Validation errors from backend
+        setError(err.response.data.errors.join(', '));
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
