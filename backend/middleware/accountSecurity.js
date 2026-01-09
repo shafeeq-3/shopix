@@ -68,7 +68,9 @@ const clearFailedLogins = (email) => {
 const auditLog = (action) => {
   return (req, res, next) => {
     const originalJson = res.json;
+    const originalSend = res.send;
     
+    // Override res.json
     res.json = function(data) {
       // Log the action
       const logEntry = {
@@ -84,10 +86,30 @@ const auditLog = (action) => {
 
       console.log('🔍 AUDIT LOG:', JSON.stringify(logEntry));
 
-      // You can save this to database for permanent storage
-      // await AuditLog.create(logEntry);
+      // Restore original method before calling
+      res.json = originalJson;
+      return res.json(data);
+    };
 
-      return originalJson.call(this, data);
+    // Override res.send
+    res.send = function(data) {
+      // Log the action
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        action: action,
+        userId: req.user?._id || 'anonymous',
+        email: req.body?.email || req.user?.email,
+        ip: req.ip || req.connection.remoteAddress,
+        userAgent: req.get('user-agent'),
+        success: res.statusCode < 400,
+        statusCode: res.statusCode
+      };
+
+      console.log('🔍 AUDIT LOG:', JSON.stringify(logEntry));
+
+      // Restore original method before calling
+      res.send = originalSend;
+      return res.send(data);
     };
 
     next();
