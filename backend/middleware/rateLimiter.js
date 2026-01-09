@@ -1,9 +1,9 @@
 const rateLimit = require('express-rate-limit');
 
-// Login rate limiter - 5 attempts per 15 minutes
+// Login rate limiter - 10 attempts per 15 minutes (increased for testing)
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per windowMs
+  max: 10, // Increased from 5 to 10
   message: {
     success: false,
     message: 'Too many login attempts. Please try again after 15 minutes.'
@@ -17,10 +17,10 @@ const loginLimiter = rateLimit({
   }
 });
 
-// Register rate limiter - 3 accounts per hour per IP
+// Register rate limiter - 10 accounts per hour per IP (increased for testing)
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 3,
+  max: 10, // Increased from 3 to 10
   message: {
     success: false,
     message: 'Too many accounts created. Please try again after an hour.'

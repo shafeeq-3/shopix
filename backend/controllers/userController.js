@@ -15,9 +15,12 @@ const registerUser = asyncHandler(async (req, res) => {
   const ip = req.ip || req.connection.remoteAddress;
   const userAgent = req.get('user-agent');
 
+  console.log('Registration attempt:', { name, email, hasPassword: !!password });
+
   const userExists = await User.findOne({ email: email.trim().toLowerCase() });
 
   if (userExists) {
+    console.log('User already exists:', email);
     res.status(400);
     throw new Error('User already exists');
   }
@@ -41,13 +44,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
   await user.save();
 
-  // Send welcome email
+  // Send welcome email (optional - won't fail registration if email fails)
   try {
     const welcomeEmail = emailTemplates.welcome(user);
     await sendEmail(user.email, 'Welcome to SHOPIX! 🎉', welcomeEmail);
     logger.info(`Welcome email sent to ${user.email}`);
   } catch (error) {
     logger.error(`Failed to send welcome email: ${error.message}`);
+    // Don't fail registration if email fails
   }
 
   res.status(201).json({
@@ -56,7 +60,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email: user.email,
     token: generateToken(user._id),
     isEmailVerified: user.isEmailVerified,
-    message: 'Registration successful! Welcome email sent.'
+    message: 'Registration successful!'
   });
 });
 // //log in - Step 1: Verify credentials and send OTP
