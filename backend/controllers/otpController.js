@@ -244,7 +244,12 @@ const verifyLoginOTP = asyncHandler(async (req, res) => {
 
   // Update user
   user.lastLogin = new Date();
-  user.addSecurityLog('OTP_LOGIN', ip, userAgent);
+  user.securityLogs.push({
+    action: 'OTP_LOGIN',
+    ip: ip,
+    userAgent: userAgent,
+    timestamp: new Date()
+  });
   await user.save();
 
   logger.info(`User logged in successfully: ${user.email}`);

@@ -136,7 +136,12 @@ const verify2FALogin = asyncHandler(async (req, res) => {
 
   // Update user
   user.lastLogin = new Date();
-  user.addSecurityLog('2FA_LOGIN', ip, userAgent);
+  user.securityLogs.push({
+    action: '2FA_LOGIN',
+    ip: ip,
+    userAgent: userAgent,
+    timestamp: new Date()
+  });
   await user.save();
 
   res.json({
