@@ -28,11 +28,17 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
   });
 
-  await user.save();
-
-  // Generate email verification token
+  // Generate email verification token before first save
   const verificationToken = user.getEmailVerificationToken();
-  user.addSecurityLog('ACCOUNT_CREATED', ip, userAgent);
+  
+  // Add security log
+  user.securityLogs = [{
+    action: 'ACCOUNT_CREATED',
+    ip: ip,
+    userAgent: userAgent,
+    timestamp: new Date()
+  }];
+
   await user.save();
 
   // Send welcome email
