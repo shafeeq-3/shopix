@@ -135,36 +135,15 @@ if (fs.existsSync(buildPath)) {
   logger.info(`Serving frontend build from: ${buildPath}`);
   app.use(express.static(buildPath));
   
-  // Catch-all route for frontend (only for non-API routes)
+  // Catch-all route for frontend SPA
   app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(buildPath, 'index.html'));
-    } else {
-      res.status(404).json({ 
-        error: 'API route not found',
-        path: req.path
-      });
-    }
+    res.sendFile(path.join(buildPath, 'index.html'));
   });
 } else {
   logger.warn('Frontend build not found. Running in API-only mode.');
   logger.info('Frontend should run separately on port 3000');
   
-  // Fallback for undefined routes (only non-API routes)
-  app.use((req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.status(404).json({ 
-        error: 'Route not found',
-        message: 'This is the backend API. Frontend runs on http://localhost:3000'
-      });
-    } else {
-      res.status(404).json({ 
-        error: 'API route not found',
-        path: req.path,
-        message: 'This API endpoint does not exist'
-      });
-    }
-  });
+  // No catch-all in API-only mode - let 404s be handled by Express default
 }
 
 const PORT = process.env.PORT || 5000;
